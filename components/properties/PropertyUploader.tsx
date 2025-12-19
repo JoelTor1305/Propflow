@@ -188,7 +188,7 @@ export default function PropertyUploader({ onAnalysisComplete }: PropertyUploade
                     <User className="w-12 h-12 text-primary mx-auto mb-4" />
                     <h3 className="text-xl font-bold text-foreground">Is this property currently rented?</h3>
                     <p className="text-muted-foreground mt-2 mb-8">
-                        If yes, we'll need to upload the Lease Agreement to import tenant details.
+                        If yes, we&apos;ll need to upload the Lease Agreement to import tenant details.
                     </p>
 
                     <div className="grid grid-cols-2 gap-4">
