@@ -31,11 +31,8 @@ export interface AgentContext {
 export async function generateAgentResponse(context: AgentContext): Promise<string> {
     try {
         // Retrieve previous interactions from vector store
-        const previousContext = await getTenantContext(
-            context.tenantId,
-            context.specificDetails,
-            3
-        );
+        // Retrieve previous interactions from vector store
+        // const previousContext = await getTenantContext(context.tenantId, context.specificDetails, 3);
 
         // Get recent communication logs from database
         const recentLogs = await prisma.communicationLog.findMany({

@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Process incoming SMS and find tenant
-        const { tenantId, message } = await processIncomingSMS(from, messageBody);
+        const { tenantId } = await processIncomingSMS(from, messageBody);
 
         if (!tenantId) {
             // Send generic response if tenant not found
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
                 headers: { 'Content-Type': 'text/xml' },
             }
         );
-    } catch (error) {
+    } catch (error: unknown) {
         console.error('Error processing SMS webhook:', error);
         return new NextResponse(
             `<?xml version="1.0" encoding="UTF-8"?>

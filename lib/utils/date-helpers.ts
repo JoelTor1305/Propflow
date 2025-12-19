@@ -1,4 +1,4 @@
-import { format, formatDistance, addDays, differenceInDays, isBefore, isAfter } from 'date-fns';
+import { format, formatDistance, addDays, differenceInDays, isBefore } from 'date-fns';
 
 /**
  * Format a date to a readable string

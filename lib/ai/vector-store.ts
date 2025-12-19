@@ -53,7 +53,7 @@ export async function storeTenantInteraction(
         message: string;
         channel: string;
         timestamp: Date;
-        metadata?: Record<string, any>;
+        metadata?: Record<string, unknown>;
     }
 ): Promise<void> {
     try {
@@ -112,10 +112,10 @@ export async function getTenantContext(
             includeMetadata: true,
         });
 
-        return results.matches.map((match: any) => ({
-            message: match.metadata?.message || '',
-            channel: match.metadata?.channel || '',
-            timestamp: match.metadata?.timestamp || '',
+        return results.matches.map((match) => ({
+            message: (match.metadata as Record<string, string>)?.message || '',
+            channel: (match.metadata as Record<string, string>)?.channel || '',
+            timestamp: (match.metadata as Record<string, string>)?.timestamp || '',
         }));
     } catch (error) {
         console.error('Error retrieving tenant context:', error);

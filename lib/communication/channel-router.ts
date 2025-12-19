@@ -91,12 +91,12 @@ export async function routeMessage(
                     error: 'Invalid channel',
                 };
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error routing message:', error);
         return {
             success: false,
             channel: preferredChannel || 'sms',
-            error: error.message,
+            error: error instanceof Error ? error.message : 'Unknown error',
         };
     }
 }

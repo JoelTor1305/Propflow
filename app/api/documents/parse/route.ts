@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
         const buffer = Buffer.from(arrayBuffer);
 
         // Parse document with AI
-        const parsed = await parseDocument(buffer, file.type, file.name);
+        const parsed = await parseDocument(buffer, file.type);
 
         // Validate extracted data
         const validation = validateExtractedData(parsed.extractedData);
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
         try {
             const uploaded = await uploadDocument(buffer, file.name, file.type);
             documentUrl = uploaded.url;
-        } catch (uploadError) {
+        } catch (uploadError: unknown) {
             console.warn('Document upload failed, continuing without storage:', uploadError);
         }
 
@@ -67,10 +67,10 @@ export async function POST(request: NextRequest) {
             documentUrl,
         });
 
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error parsing document:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to parse document' },
+            { error: error instanceof Error ? error.message : 'Failed to parse document' },
             { status: 500 }
         );
     }

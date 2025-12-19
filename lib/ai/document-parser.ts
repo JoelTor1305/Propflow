@@ -32,9 +32,37 @@ export interface ExtractedTenantData {
     };
 }
 
+export interface ExtractedPropertyData {
+    owner: {
+        legalName1?: string;
+        legalName2?: string;
+        email?: string;
+        phone?: string;
+        mailingAddress?: string;
+    };
+    property: {
+        address?: string;
+        type?: 'condo' | 'single_family' | 'multi_unit' | 'commercial';
+        beds?: number;
+        baths?: number;
+        garageSpaces?: number;
+        upgrades?: string;
+    };
+    financials: {
+        listPrice?: number;
+        hoaFee?: number;
+        taxAmount?: number;
+    };
+    legalDescription?: string;
+    documentType?: 'deed' | 'lease' | 'management_agreement' | 'other';
+    confidence: {
+        [key: string]: number;
+    };
+}
+
 export interface ParsedDocument {
-    documentType: 'lease' | 'application' | 'id' | 'w9' | 'unknown';
-    extractedData: ExtractedTenantData;
+    documentType: 'lease' | 'application' | 'id' | 'w9' | 'property' | 'unknown';
+    extractedData: ExtractedTenantData | ExtractedPropertyData;
     overallConfidence: number;
     rawText?: string;
 }
@@ -44,8 +72,7 @@ export interface ParsedDocument {
  */
 export async function parseDocument(
     fileBuffer: Buffer,
-    mimeType: string,
-    fileName: string
+    mimeType: string
 ): Promise<ParsedDocument> {
     try {
         const openai = getOpenAIClient();
@@ -55,7 +82,7 @@ export async function parseDocument(
         const isPDF = mimeType === 'application/pdf';
 
         let extractedText = '';
-        let documentType: 'lease' | 'application' | 'id' | 'w9' | 'unknown' = 'unknown';
+        let documentType: ParsedDocument['documentType'] = 'unknown';
 
         if (isImage) {
             // Use GPT-4 Vision for images
@@ -77,7 +104,7 @@ export async function parseDocument(
                 max_tokens: 50,
             });
 
-            documentType = (classificationResponse.choices[0]?.message?.content?.trim().toLowerCase() || 'unknown') as any;
+            documentType = (classificationResponse.choices[0]?.message?.content?.trim().toLowerCase() || 'unknown') as ParsedDocument['documentType'];
 
             // Then extract data based on document type
             const extractionPrompt = buildExtractionPrompt(documentType);
@@ -100,8 +127,7 @@ export async function parseDocument(
             extractedText = extractionResponse.choices[0]?.message?.content || '{}';
 
         } else if (isPDF) {
-            // For PDFs, extract text first (will implement PDF parsing separately)
-            // For now, return a placeholder
+            // Placeholder for PDF parsing logic
             extractedText = '{"name": null, "confidence": {}}';
             documentType = 'lease';
         }
@@ -109,8 +135,8 @@ export async function parseDocument(
         // Parse the extracted JSON
         const parsedData = JSON.parse(extractedText);
 
-        // Normalize phone numbers
-        if (parsedData.phone) {
+        // Normalize phone numbers if present
+        if ('phone' in parsedData && parsedData.phone) {
             parsedData.phone = formatPhoneNumber(parsedData.phone);
         }
 
@@ -142,39 +168,14 @@ export function validateExtractedData(data: ExtractedTenantData): {
 } {
     const errors: string[] = [];
 
-    // Check required fields
-    if (!data.name) {
-        errors.push('Tenant name is required');
-    }
+    if (!data.name) errors.push('Tenant name is required');
+    if (data.email && !data.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) errors.push('Invalid email format');
+    if (data.phone && !data.phone.match(/^\+?1?\d{10,}$/)) errors.push('Invalid phone number format');
+    if (data.leaseStartDate && isNaN(Date.parse(data.leaseStartDate))) errors.push('Invalid lease start date');
+    if (data.leaseEndDate && isNaN(Date.parse(data.leaseEndDate))) errors.push('Invalid lease end date');
+    if (data.rentAmount && (data.rentAmount < 0 || data.rentAmount > 1000000)) errors.push('Invalid rent amount');
 
-    // Validate email format if present
-    if (data.email && !data.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        errors.push('Invalid email format');
-    }
-
-    // Validate phone format if present
-    if (data.phone && !data.phone.match(/^\+?1?\d{10,}$/)) {
-        errors.push('Invalid phone number format');
-    }
-
-    // Validate dates if present
-    if (data.leaseStartDate && isNaN(Date.parse(data.leaseStartDate))) {
-        errors.push('Invalid lease start date');
-    }
-
-    if (data.leaseEndDate && isNaN(Date.parse(data.leaseEndDate))) {
-        errors.push('Invalid lease end date');
-    }
-
-    // Validate rent amount if present
-    if (data.rentAmount && (data.rentAmount < 0 || data.rentAmount > 1000000)) {
-        errors.push('Invalid rent amount');
-    }
-
-    return {
-        isValid: errors.length === 0,
-        errors,
-    };
+    return { isValid: errors.length === 0, errors };
 }
 
 /**
@@ -184,4 +185,23 @@ export function getConfidenceLevel(confidence: number): 'high' | 'medium' | 'low
     if (confidence >= 0.9) return 'high';
     if (confidence >= 0.7) return 'medium';
     return 'low';
+}
+
+/**
+ * Validate extracted property data
+ */
+export function validatePropertyData(data: ExtractedPropertyData): {
+    isValid: boolean;
+    errors: string[];
+} {
+    const errors: string[] = [];
+
+    // Validations based on Chase Rental Form requirements and critical Deed info
+    if (!data.property?.address) errors.push('Property address is required');
+    if (!data.owner?.legalName1) errors.push('Primary owner name is required');
+
+    return {
+        isValid: errors.length === 0,
+        errors,
+    };
 }

@@ -15,9 +15,15 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        let result: any = {};
+        let result: Record<string, unknown> = {};
 
         switch (workflowType) {
+            case 'tenant_followup':
+            // ... (omitting unchanged lines for brevity in instruction, but tool needs exact content to match)
+            // Actually I will do two chunks or use multi_replace.
+            // Chunk 1: result type
+            // Chunk 2: catch block
+
             case 'tenant_followup':
             case 'document_collection': {
                 if (!tenantId) {
@@ -133,10 +139,10 @@ export async function POST(request: NextRequest) {
         }
 
         return NextResponse.json(result);
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error triggering workflow:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to trigger workflow' },
+            { error: error instanceof Error ? error.message : 'Failed to trigger workflow' },
             { status: 500 }
         );
     }

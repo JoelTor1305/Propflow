@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         return new NextResponse(twiml, {
             headers: { 'Content-Type': 'text/xml' },
         });
-    } catch (error) {
+    } catch (error: unknown) {
         console.error('Error processing voice gather:', error);
         return new NextResponse(
             `<?xml version="1.0" encoding="UTF-8"?>

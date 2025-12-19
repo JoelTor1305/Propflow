@@ -4,7 +4,7 @@ export interface N8NWebhookPayload {
     workflowType: 'tenant_followup' | 'document_collection' | 'compliance_check';
     tenantId?: string;
     propertyId?: string;
-    data: Record<string, any>;
+    data: Record<string, unknown>;
 }
 
 /**
@@ -45,11 +45,11 @@ export async function triggerN8NWorkflow(
             success: true,
             executionId: response.data?.executionId,
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error triggering n8n workflow:', error);
         return {
             success: false,
-            error: error.message,
+            error: error instanceof Error ? error.message : 'Unknown error',
         };
     }
 }
@@ -60,7 +60,7 @@ export async function triggerN8NWorkflow(
 export async function triggerTenantFollowup(
     tenantId: string,
     scenario: string,
-    details: Record<string, any>
+    details: Record<string, unknown>
 ): Promise<{ success: boolean; executionId?: string }> {
     const result = await triggerN8NWorkflow({
         workflowType: 'tenant_followup',
@@ -83,7 +83,7 @@ export async function triggerTenantFollowup(
 export async function triggerDocumentCollection(
     tenantId: string,
     documentType: string,
-    details: Record<string, any>
+    details: Record<string, unknown>
 ): Promise<{ success: boolean; executionId?: string }> {
     const result = await triggerN8NWorkflow({
         workflowType: 'document_collection',

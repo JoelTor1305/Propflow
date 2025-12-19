@@ -24,7 +24,8 @@ export async function initiateCall(
         const formattedPhone = formatPhoneNumber(to);
 
         // Create TwiML for the call
-        const twimlUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/twilio/voice/twiml?message=${encodeURIComponent(message)}&tenantId=${tenantId}`;
+        // Create TwiML for the call
+        // const twimlUrl = ... (unused)
 
         const call = await twilioClient.calls.create({
             twiml: generateCallTwiML(message),
@@ -53,8 +54,9 @@ export async function initiateCall(
             success: true,
             callId: call.sid,
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error initiating call:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
         // Log failed attempt
         await prisma.communicationLog.create({
@@ -65,7 +67,7 @@ export async function initiateCall(
                 message,
                 status: 'failed',
                 metadata: {
-                    error: error.message,
+                    error: errorMessage,
                     to,
                 },
             },
@@ -73,7 +75,7 @@ export async function initiateCall(
 
         return {
             success: false,
-            error: error.message,
+            error: errorMessage,
         };
     }
 }

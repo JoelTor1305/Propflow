@@ -55,8 +55,9 @@ export async function sendEmail(
             success: true,
             messageId: emailData.data?.id,
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error sending email:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
         // Log failed attempt
         await prisma.communicationLog.create({
@@ -67,7 +68,7 @@ export async function sendEmail(
                 message: `Subject: ${subject}\n\n${message}`,
                 status: 'failed',
                 metadata: {
-                    error: error.message,
+                    error: errorMessage,
                     to,
                     subject,
                 },
@@ -76,7 +77,7 @@ export async function sendEmail(
 
         return {
             success: false,
-            error: error.message,
+            error: errorMessage,
         };
     }
 }

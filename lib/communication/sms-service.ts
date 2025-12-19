@@ -48,8 +48,9 @@ export async function sendSMS(
             success: true,
             messageId: twilioMessage.sid,
         };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error sending SMS:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
         // Log failed attempt
         await prisma.communicationLog.create({
@@ -60,7 +61,7 @@ export async function sendSMS(
                 message,
                 status: 'failed',
                 metadata: {
-                    error: error.message,
+                    error: errorMessage,
                     to,
                 },
             },
@@ -68,7 +69,7 @@ export async function sendSMS(
 
         return {
             success: false,
-            error: error.message,
+            error: errorMessage,
         };
     }
 }

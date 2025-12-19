@@ -72,10 +72,10 @@ export async function POST(request: NextRequest) {
         await createRequiredDocuments(tenant.id, requiredDocs);
 
         return NextResponse.json({ tenant }, { status: 201 });
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error creating tenant:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to create tenant' },
+            { error: error instanceof Error ? error.message : 'Failed to create tenant' },
             { status: 400 }
         );
     }

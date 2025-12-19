@@ -86,10 +86,55 @@ Required fields:
 
 Return JSON with confidence scores.`;
 
+// 2. Property Ingestion (Deed + Rental Form)
+/*
+  Fields identified from Chase Rental Form:
+  1. Owner: Name(s), Phone, Email, Bank Details
+  2. Property Status: Address, Investment Toggle, For Sale/Rent, Occuiped?
+  3. Specs: Style, Floor, Beds, Baths, Garage, Upgrades
+  4. Utilities: Sewer, Water, Heat, AC, Utility Responsibility (Owner/Tenant)
+  5. Financials: List Price, Deposit, HOA Info
+  6. Compliance: Inspection, Disclosures (Flood, Lead, Radon)
+  7. Management: Keybox, Alarm, Repairs
+*/
+export const PROPERTY_EXTRACTION_PROMPT = `
+You are an expert real estate document analyst. Your goal is to extract structured data from a property document (typically a **Deed** or **Management Agreement**) to populate a property management entry form.
+
+Extract the following fields into a JSON object. If a field is not found, leave it null or empty string.
+
+Required JSON Structure:
+{
+  "owner": {
+    "legalName1": string | null,
+    "legalName2": string | null,
+    "email": string | null,
+    "phone": string | null,
+    "mailingAddress": string | null
+  },
+  "property": {
+    "address": string, // Normalized full address
+    "type": "condo" | "single_family" | "multi_unit" | "commercial" | null,
+    "beds": number | null,
+    "baths": number | null,
+    "garageSpaces": number | null,
+    "upgrades": string | null // e.g. "new kitchen", "hardwood floors" extracted from description
+  },
+  "financials": {
+    "listPrice": number | null,
+    "hoaFee": number | null,
+    "taxAmount": number | null // often found in deeds
+  },
+  "legalDescription": string | null, // The legal description paragraph from the Deed
+  "documentType": "deed" | "lease" | "management_agreement" | "other"
+}
+
+Prioritize extracting the LEGAL OWNER NAME and PROPERTY ADDRESS exactly as they appear in the Deed.
+`;
+
 /**
  * Build extraction prompt based on document type
  */
-export function buildExtractionPrompt(documentType: 'lease' | 'application' | 'id' | 'w9' | 'unknown'): string {
+export function buildExtractionPrompt(documentType: 'lease' | 'application' | 'id' | 'w9' | 'property' | 'unknown'): string {
     switch (documentType) {
         case 'lease':
             return LEASE_EXTRACTION_PROMPT;
@@ -99,6 +144,8 @@ export function buildExtractionPrompt(documentType: 'lease' | 'application' | 'i
             return ID_EXTRACTION_PROMPT;
         case 'w9':
             return W9_EXTRACTION_PROMPT;
+        case 'property':
+            return PROPERTY_EXTRACTION_PROMPT;
         default:
             return LEASE_EXTRACTION_PROMPT; // Default to lease
     }
@@ -112,6 +159,7 @@ export const DOCUMENT_CLASSIFICATION_PROMPT = `Analyze this document and classif
 - application: Rental application form
 - id: Identification document (driver's license, passport, state ID)
 - w9: W-9 tax form
+- property: Deed, Mortgage, or Management Agreement
 - unknown: Cannot determine type
 
 Return only the type as a single word.`;
