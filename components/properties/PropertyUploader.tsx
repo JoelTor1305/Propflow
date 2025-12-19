@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useState } from 'react';
-import { Upload, FileText, CheckCircle, AlertCircle, Loader2, ArrowRight, Building, User } from 'lucide-react';
+import { FileText, CheckCircle, Loader2, ArrowRight, Building, User } from 'lucide-react';
 import { IngestionDocumentType, ExtractedPropertyData } from '@/lib/ai/ingestion';
 
 interface PropertyUploaderProps {
@@ -196,14 +196,14 @@ export default function PropertyUploader({ onAnalysisComplete }: PropertyUploade
                             onClick={() => onAnalysisComplete(combinedData)}
                             className="p-4 border border-white/10 rounded-xl hover:bg-white/5 transition-all text-left group"
                         >
-                            <span className="block font-semibold text-foreground mb-1 group-hover:text-primary">No, it's vacant</span>
+                            <span className="block font-semibold text-foreground mb-1 group-hover:text-primary">No, it&apos;s vacant</span>
                             <span className="text-xs text-muted-foreground">Skip tenant setup for now.</span>
                         </button>
                         <button
                             onClick={() => setStep('upload-lease')}
                             className="p-4 border border-primary/50 bg-primary/5 rounded-xl hover:bg-primary/10 transition-all text-left"
                         >
-                            <span className="block font-semibold text-primary mb-1">Yes, it's occupied</span>
+                            <span className="block font-semibold text-primary mb-1">Yes, it&apos;s occupied</span>
                             <span className="text-xs text-muted-foreground">Upload lease next.</span>
                         </button>
                     </div>

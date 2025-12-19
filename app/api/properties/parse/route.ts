@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { parseIngestionDocument, IngestionDocumentType } from '@/lib/ai/ingestion';
 
 // pdf-parse is a CommonJS module, use require
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const pdf = require('pdf-parse');
 
 export async function POST(request: NextRequest) {

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { propertySchema } from '@/lib/utils/validation';
 import { storePropertyInfo } from '@/lib/ai/vector-store';
 
 export async function GET() {
