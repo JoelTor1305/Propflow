@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { prisma } from '@/lib/prisma';
 
 // Configuration
 const BASELINE_MONTHS_COUNT = 15;
@@ -145,6 +146,55 @@ export function analyzeProperties(dataset: PropertyData[]): AnalysisResult {
             anomaly_detection_rate: (propertiesWithAnomalies / dataset.length) * 100,
             total_cost_impact: parseFloat(totalImpact.toFixed(2))
         }
+    };
+}
+
+/**
+ * Perform analysis for a specific property using real data from the database
+ */
+export async function analyzePropertyAnomalies(propertyId: string) {
+    // Fetch last readings for all utility types
+    const readings = await prisma.utilityReading.findMany({
+        where: { propertyId },
+        orderBy: { readingDate: 'asc' },
+        take: 100 // Safety cap
+    });
+
+    if (readings.length < 3) {
+        return {
+            property_id: propertyId,
+            detection_results: [],
+            message: "Insufficient data for analysis (minimum 3 readings required)"
+        };
+    }
+
+    const utilityTypes = Array.from(new Set(readings.map((r: any) => r.utilityType))) as ('Water' | 'Electric' | 'Gas')[];
+    const results: DetectionResult[] = [];
+
+    for (const type of utilityTypes) {
+        const typeReadings = readings.filter((r: any) => r.utilityType === type);
+        if (typeReadings.length < 3) continue;
+
+        const monthlyUsage: MonthlyUsage[] = typeReadings.map((r: any) => ({
+            month: r.readingDate.toISOString().split('T')[0].substring(0, 7),
+            usage: r.value
+        }));
+
+        const propertyData: PropertyData = {
+            property_id: propertyId,
+            property_name: "Property", // We could fetch this if needed
+            usage_history: monthlyUsage
+        };
+
+        // Reuse the core logic by wrapping it in the expected array format
+        const analysis = analyzeProperties([propertyData]);
+        results.push(...analysis.detection_results.filter(r => r.utility_type === type));
+    }
+
+    return {
+        property_id: propertyId,
+        detection_results: results,
+        timestamp: new Date().toISOString()
     };
 }
 

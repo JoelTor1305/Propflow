@@ -7,8 +7,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("NETLIFY_DATABASE_URL")
 }
 
 model Property {
@@ -49,6 +49,8 @@ model Property {
   maintenanceRequests MaintenanceRequest[]
   marketSnapshots     MarketSnapshot[]
   leaseOptimizations  LeaseOptimization[]
+  utilityReadings     UtilityReading[]
+  anomalies           Anomaly[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -609,4 +611,50 @@ model LeaseRecommendation {
   impact      Float // Projected revenue impact
 
   createdAt   DateTime @default(now())
+}
+
+model UtilityReading {
+  id           String   @id @default(cuid())
+  propertyId   String
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  utilityType  String   // Water, Electric, Gas
+  readingDate  DateTime
+  value        Float    // Usage amount
+  unit         String   // gal, kWh, therms
+  
+  isAnomaly    Boolean  @default(false)
+  anomaly      Anomaly?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([propertyId])
+  @@index([readingDate])
+  @@index([utilityType])
+}
+
+model Anomaly {
+  id               String   @id @default(cuid())
+  propertyId       String
+  property         Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  readingId        String?  @unique
+  reading          UtilityReading? @relation(fields: [readingId], references: [id])
+  
+  utilityType      String
+  severity         String   // low, medium, high
+  message          String
+  
+  thresholdValue   Float
+  actualValue      Float
+  
+  isResolved       Boolean  @default(false)
+  resolvedAt       DateTime?
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([propertyId])
+  @@index([createdAt])
 }

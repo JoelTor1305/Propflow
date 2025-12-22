@@ -4,42 +4,42 @@ import { analyzeProperties, PropertyData, MonthlyUsage } from '@/lib/ai/anomaly-
 
 export async function GET() {
     try {
-        // Fetch real properties from DB
+        // Fetch real properties and their readings from DB
         const properties = await prisma.property.findMany({
-            select: { id: true, name: true }
+            include: {
+                utilityReadings: {
+                    orderBy: { readingDate: 'asc' },
+                    take: 100
+                }
+            }
         });
 
         if (properties.length === 0) {
             return NextResponse.json({
-                total_properties: 0,
-                anomalies_detected: 0,
-                anomaly_rate: 0,
-                results: []
+                total_properties_analyzed: 0,
+                message: "No properties found in database"
             });
         }
 
-        // Generate synthetic history for real properties so the AI has data to work with
-        // In a real app, this would come from UtilityBill entries
-        const dataset: PropertyData[] = properties.map(p => {
-            const history: MonthlyUsage[] = [];
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-
-            // Base usage around 5000 gallons/units
-            const baseUsage = 4000 + Math.random() * 2000;
-
-            months.forEach(month => {
-                history.push({
-                    month,
-                    usage: Math.round(baseUsage + (Math.random() * 1000 - 500))
-                });
-            });
-
-            return {
-                property_id: p.id, // REAL ID
+        // Map database readings to the format expected by the analyzer
+        const dataset: PropertyData[] = properties
+            .filter(p => p.utilityReadings.length >= 3)
+            .map(p => ({
+                property_id: p.id,
                 property_name: p.name,
-                usage_history: history
-            };
-        });
+                usage_history: p.utilityReadings.map(r => ({
+                    month: r.readingDate.toISOString().split('T')[0].substring(0, 7),
+                    usage: r.value
+                }))
+            }));
+
+        if (dataset.length === 0) {
+            return NextResponse.json({
+                total_properties_analyzed: properties.length,
+                properties_with_history: 0,
+                message: "Insufficient reading history for analysis (need at least 3 readings per property)"
+            });
+        }
 
         const analysis = analyzeProperties(dataset);
 
