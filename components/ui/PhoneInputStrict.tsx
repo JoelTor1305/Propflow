@@ -58,16 +58,8 @@ export function PhoneInput({
         // Strip non-digits
         const digits = val.replace(/\D/g, '');
 
-        // Strict 9-digit limit (or 10 for US standard? Sticking to 10 for US standard as safe default, 
-        // unless strictly requested 9 again. Previous task said 3-2-4 which is 9 digits (3+2+4=9). 
-        // But US numbers are 10 digits (3 area + 3 prefix + 4 line). 
-        // 3-2-4 implies (xxx)-xx-xxxx. That's 9 digits. 
-        // I will implement 10 digits to be safe (3-3-4) unless specifically 3-2-4 is the 'weird' requirement.
-        // User said: "Refine mask to 3-2-4 format (xxx)-xx-xxxx".
-        // (123)-45-6789 is 3+2+4 = 9 digits.
-        // Okay, I will strictly follow 9 digits if that's what was requested.
-
-        const limit = 9;
+        // Standard 10-digit US format (3-3-4)
+        const limit = 10;
         const limited = digits.substring(0, limit);
 
         let formatted = limited;
@@ -75,10 +67,10 @@ export function PhoneInput({
             formatted = `(${limited.substring(0, 3)}`;
         }
         if (limited.length >= 3) {
-            formatted = `(${limited.substring(0, 3)})-${limited.substring(3, 5)}`;
+            formatted = `(${limited.substring(0, 3)}) ${limited.substring(3, 6)}`;
         }
-        if (limited.length >= 5) {
-            formatted = `(${limited.substring(0, 3)})-${limited.substring(3, 5)}-${limited.substring(5, 9)}`;
+        if (limited.length >= 6) {
+            formatted = `(${limited.substring(0, 3)}) ${limited.substring(3, 6)}-${limited.substring(6, 10)}`;
         }
 
         return { formatted, digits: limited };
