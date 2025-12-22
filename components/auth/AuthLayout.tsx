@@ -3,6 +3,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import ReactiveBackground from '@/components/ui/ReactiveBackground';
+import BrandLogo from '@/components/ui/BrandLogo';
 
 export default function AuthLayout({
     children,
@@ -12,32 +13,14 @@ export default function AuthLayout({
     maxWidth?: string;
 }) {
     return (
-        <div className="relative min-h-screen w-full overflow-hidden bg-background text-foreground flex flex-col items-center justify-center">
+        <div className="relative min-h-screen w-full bg-background text-foreground flex flex-col items-center justify-center py-12 sm:px-6 lg:px-8">
             {/* Reactive Background Gradient */}
             <ReactiveBackground />
 
-            {/* Centered Branding (Dashboard Style) */}
-            <div className="relative z-20 flex flex-col items-center justify-center gap-0 mb-8 -mt-36 animate-in fade-in slide-in-from-top-4 duration-700">
-                <div className="relative h-32 w-32 flex-shrink-0 transition-transform hover:scale-105 duration-300 z-10">
-                    <Image
-                        src="/propflow_logo_new.png"
-                        alt="PropFlow Logo"
-                        fill
-                        className="object-contain brightness-0 invert drop-shadow-xl"
-                        priority
-                    />
-                </div>
-                <div className="flex flex-col items-center -mt-8 relative z-20">
-                    <span className="text-5xl font-bold tracking-wide text-white drop-shadow-lg" style={{ fontFamily: 'var(--font-outfit)' }}>
-                        PropFlow
-                    </span>
-                    <span className="text-sm text-blue-200/90 tracking-widest uppercase font-medium mt-1">
-                        Property Management
-                    </span>
-                </div>
-            </div>
+            {/* Stacked Branding (Dashboard Style - Large) */}
+            <BrandLogo variant="large" className="mb-8" />
 
-            <div className={`relative z-10 w-full ${maxWidth} px-4`}>
+            <div className={`relative z-10 w-full ${maxWidth}`}>
                 {children}
             </div>
 

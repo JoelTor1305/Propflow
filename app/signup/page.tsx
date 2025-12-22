@@ -111,7 +111,7 @@ export default function SignupPage() {
 
     return (
         <AuthLayout maxWidth="max-w-2xl">
-            <div className="w-full bg-card/40 backdrop-blur-2xl border border-white/10 p-8 py-10 rounded-3xl shadow-2xl relative overflow-hidden group">
+            <div className="w-full bg-card/40 backdrop-blur-2xl border border-white/20 p-8 py-10 rounded-3xl shadow-2xl relative overflow-hidden group">
                 {/* Subtle top glow */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent blur-sm group-hover:via-primary/80 transition-all duration-500" />
 

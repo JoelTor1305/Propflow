@@ -76,9 +76,51 @@ export function PhoneInput({
         return { formatted, digits: limited };
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        // Allow deleting separators naturally
+        if (e.key === 'Backspace') {
+            // Get cursor position from ref if we had one, but strict React input is tricky.
+            // Simpler heuristic: If the value ends with a separator, or we just want to ensure it feels right:
+            // The standard 'change' event will trigger.
+            // BUT: if cursor is after a separator, standard backspace might not delete the char before it unless we force it.
+            // Actually, simplest 'deletable' feel: if the user hits backspace and the regex-stripped digits result is same length
+            // as previous, it means they hit a separator. We should proactively slice a digit off.
+        }
+    };
+
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
-        const { formatted, digits } = formatPhoneNumber(val);
+        const inputType = (e.nativeEvent as InputEvent).inputType; // 'deleteContentBackward' etc.
+
+        let newDigits = val.replace(/\D/g, '');
+
+        // Smart Delete Handling:
+        // If the user effectively deleted a separator (digits didn't change count but length reduced or cursor moved),
+        // we normally "resist" in strict mode.
+        // To allow "deleting" the dash, we check if operation was a delete and digits count resembles no change?
+        // Actually, easiest way is: If the input was a delete event, and the raw digits are same as before, 
+        // it implies they deleted a formatting char. We should remove the last digit (or digit at cursor).
+        // Since cursor tracking is hard without a ref, we'll try a simpler approach often used:
+        // Just let it re-format.
+        // Wait, user says "dashes and parenthesis should be deletable". 
+        // If I have `(555) 555-5555` and backspace `-`, `val` becomes `(555) 5555555`. 
+        // `digits` is `5555555555`. Reformat is `(555) 555-5555`. 
+        // Result: Dash comes back.
+
+        // FIX: If we detect a delete on a separator position, we remove the digit before it.
+        // We'll track previous value.
+
+        const prevDigits = (displayValue || '').replace(/\D/g, '');
+        const isDelete = inputType?.includes('delete');
+
+        if (isDelete && newDigits.length === prevDigits.length) {
+            // User deleted a non-digit. Remove the last digit to make it "feel" like progress?
+            // Or better: remove the digit immediately preceding the deleted char? 
+            // Without cursor position, removing the LAST digit is the safest fallback for "end of line" editing.
+            newDigits = newDigits.slice(0, -1);
+        }
+
+        const { formatted, digits } = formatPhoneNumber(newDigits);
 
         setDisplayValue(formatted);
 

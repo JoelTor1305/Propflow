@@ -1,0 +1,58 @@
+'use client';
+
+import React from 'react';
+import Image from 'next/image';
+import { cn } from '@/lib/utils';
+
+interface BrandLogoProps {
+    variant?: 'large' | 'sidebar';
+    className?: string;
+}
+
+export default function BrandLogo({ variant = 'large', className }: BrandLogoProps) {
+    const isLarge = variant === 'large';
+
+    return (
+        <div className={cn("relative z-20 flex flex-col items-center justify-center gap-0 animate-in fade-in slide-in-from-top-4 duration-700", className)}>
+            {/* Logo Icon */}
+            <div
+                className={cn(
+                    "relative flex-shrink-0 transition-transform hover:scale-105 duration-300 z-10",
+                    isLarge ? "h-32 w-32 ml-5 mt-2" : "h-20 w-20 ml-3 mt-1"
+                )}
+            >
+                <Image
+                    src="/propflow_logo_new.png"
+                    alt="PropFlow Logo"
+                    fill
+                    className="object-contain brightness-0 invert drop-shadow-xl"
+                    priority
+                />
+            </div>
+
+            {/* Text & Tagline */}
+            <div className={cn(
+                "flex flex-col items-center relative z-20",
+                isLarge ? "-mt-14" : "-mt-9"
+            )}>
+                <span
+                    className={cn(
+                        "font-bold tracking-wide text-white drop-shadow-lg",
+                        isLarge ? "text-5xl" : "text-2xl"
+                    )}
+                    style={{ fontFamily: 'var(--font-outfit)' }}
+                >
+                    PropFlow
+                </span>
+                <span
+                    className={cn(
+                        "text-blue-200/90 tracking-widest uppercase font-medium mt-1",
+                        isLarge ? "text-sm" : "text-[10px]"
+                    )}
+                >
+                    Property Management
+                </span>
+            </div>
+        </div>
+    );
+}
