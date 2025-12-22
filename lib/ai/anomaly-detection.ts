@@ -168,14 +168,14 @@ export async function analyzePropertyAnomalies(propertyId: string) {
         };
     }
 
-    const utilityTypes = Array.from(new Set(readings.map((r: any) => r.utilityType))) as ('Water' | 'Electric' | 'Gas')[];
+    const utilityTypes = Array.from(new Set(readings.map((r) => r.utilityType))) as ('Water' | 'Electric' | 'Gas')[];
     const results: DetectionResult[] = [];
 
     for (const type of utilityTypes) {
-        const typeReadings = readings.filter((r: any) => r.utilityType === type);
+        const typeReadings = readings.filter((r) => r.utilityType === type);
         if (typeReadings.length < 3) continue;
 
-        const monthlyUsage: MonthlyUsage[] = typeReadings.map((r: any) => ({
+        const monthlyUsage: MonthlyUsage[] = typeReadings.map((r) => ({
             month: r.readingDate.toISOString().split('T')[0].substring(0, 7),
             usage: r.value
         }));

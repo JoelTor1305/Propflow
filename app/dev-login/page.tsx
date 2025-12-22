@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthLayout from '@/components/auth/AuthLayout';
-import { Input } from '@/components/ui/Input';
 import { Shield, ArrowRight, Lock } from 'lucide-react';
 
 export default function DevLoginPage() {

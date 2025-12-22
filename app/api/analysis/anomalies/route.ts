@@ -1,6 +1,6 @@
+import { analyzeProperties, PropertyData } from '@/lib/ai/anomaly-detection';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { analyzeProperties, PropertyData, MonthlyUsage } from '@/lib/ai/anomaly-detection';
 
 export async function GET() {
     try {
