@@ -172,7 +172,7 @@ export default function ManagerDashboard() {
                                         <span className="text-xs text-muted-foreground">Unit 1A</span>
                                     </div>
                                     <p className="text-sm font-medium text-white mb-1">Water Leak - Kitchen Sink</p>
-                                    <p className="text-xs text-gray-400">Vendor: Mario's Plumbing</p>
+                                    <p className="text-xs text-gray-400">Vendor: Mario&apos;s Plumbing</p>
                                 </div>
                                 <div className="p-4 rounded-xl border border-white/10 bg-white/5">
                                     <div className="flex justify-between items-start mb-2">
