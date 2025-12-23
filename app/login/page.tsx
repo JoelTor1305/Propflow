@@ -17,6 +17,8 @@ export default function LoginPage() {
     const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
     const router = useRouter();
 
+    const [devMode, setDevMode] = useState(false);
+
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -26,14 +28,16 @@ export default function LoginPage() {
         const { email, password } = formData;
         const newErrors: { email?: string; password?: string } = {};
 
-        if (!email) {
-            newErrors.email = 'Email is required';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            newErrors.email = 'Invalid email address';
+        if (!devMode) {
+            if (!email) {
+                newErrors.email = 'Email is required';
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                newErrors.email = 'Invalid email address';
+            }
         }
 
         if (!password) {
-            newErrors.password = 'Password is required';
+            newErrors.password = devMode ? 'Security key is required' : 'Password is required';
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -44,13 +48,13 @@ export default function LoginPage() {
 
         try {
             const result = await signIn('credentials', {
-                email: email.trim(),
+                email: devMode ? 'dev@propflow.ai' : email.trim(),
                 password: password.trim(),
                 redirect: false,
             });
 
             if (result?.error) {
-                setError('Invalid credentials');
+                setError(devMode ? 'Invalid security key' : 'Invalid credentials');
                 setLoading(false);
             } else {
                 // Successful login - fetch user role to determine redirect
@@ -80,45 +84,54 @@ export default function LoginPage() {
 
     return (
         <AuthLayout>
-            <div className="w-full bg-card/50 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-xl">
+            <div className="w-full bg-card/50 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-xl relative overflow-hidden">
+                {devMode && (
+                    <div className="absolute top-0 left-0 w-full h-1 bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                )}
+
                 <div className="mb-8 text-center">
                     <h1 className="text-3xl font-bold tracking-tight text-white mb-2">
-                        Welcome back
+                        {devMode ? 'Developer Access' : 'Welcome back'}
                     </h1>
                     <p className="text-muted-foreground">
-                        Enter your credentials to access your dashboard.
+                        {devMode ? 'Enter security key to bypass authentication' : 'Enter your credentials to access your dashboard.'}
                     </p>
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500" noValidate>
-                    <Input
-                        type="email"
-                        label="Email Address"
-                        placeholder="john@example.com"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        required
-                        error={errors.email}
-                    />
+                    {!devMode && (
+                        <Input
+                            type="email"
+                            label="Email Address"
+                            placeholder="john@example.com"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            required
+                            error={errors.email}
+                            className="bg-white/5 border-white/10"
+                        />
+                    )}
 
                     <div className="space-y-1">
                         <div className="flex justify-between items-center">
-                            <label className="text-sm font-medium text-muted-foreground ml-1">Password</label>
-                            <Link href="#" className="text-xs text-primary hover:underline">Forgot password?</Link>
+                            <label className="text-sm font-medium text-muted-foreground ml-1">
+                                {devMode ? 'Security Key' : 'Password'}
+                            </label>
+                            {!devMode && <Link href="#" className="text-xs text-primary hover:underline">Forgot password?</Link>}
                         </div>
                         <Input
                             type="password"
-                            placeholder="••••••••"
+                            placeholder={devMode ? "••••••••" : "••••••••"}
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             required
-                            className="mt-0"
+                            className={`mt-0 bg-white/5 border-white/10 ${devMode ? 'text-lg font-mono tracking-widest' : ''}`}
                             error={errors.password}
                         />
                     </div>
 
                     {error && (
-                        <div className="text-sm text-red-500 bg-red-500/10 p-3 rounded-md text-center">
+                        <div className="text-sm text-red-500 bg-red-500/10 p-3 rounded-md text-center border border-red-500/20">
                             {error}
                         </div>
                     )}
@@ -126,7 +139,7 @@ export default function LoginPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-md transition-all mt-6 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                        className={`w-full h-12 text-white font-bold rounded-md transition-all mt-6 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed shadow-lg ${devMode ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/20' : 'bg-primary hover:bg-primary/90'}`}
                     >
                         {loading ? (
                             <span className="flex items-center">
@@ -134,19 +147,31 @@ export default function LoginPage() {
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                Signing In...
+                                {devMode ? 'Authenticating...' : 'Signing In...'}
                             </span>
                         ) : (
-                            "Sign In"
+                            devMode ? "Authenticate" : "Sign In"
                         )}
                     </button>
                 </form>
 
-                <div className="mt-6 text-center text-sm">
-                    <span className="text-muted-foreground">Don&apos;t have an account? </span>
-                    <Link href="/signup" className="text-primary hover:underline font-medium">
-                        Sign up
-                    </Link>
+                <div className="mt-8 flex flex-col items-center gap-4">
+                    <div className="text-sm">
+                        <span className="text-muted-foreground">Don&apos;t have an account? </span>
+                        <Link href="/signup" className="text-primary hover:underline font-medium">
+                            Sign up
+                        </Link>
+                    </div>
+
+                    <div className="w-full pt-6 border-t border-white/5 flex justify-center">
+                        <button
+                            onClick={() => setDevMode(!devMode)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 text-[10px] text-slate-500 hover:text-white font-bold uppercase tracking-[0.2em] transition-all"
+                        >
+                            <div className={`w-1.5 h-1.5 rounded-full ${devMode ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-slate-600'}`} />
+                            {devMode ? 'Exit Dev Mode' : 'Enter Dev Mode'}
+                        </button>
+                    </div>
                 </div>
 
 

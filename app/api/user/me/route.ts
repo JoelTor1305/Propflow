@@ -10,6 +10,18 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        // Handle anonymous Developer Mode
+        if (session.user.id === 'dev-mode-user') {
+            return NextResponse.json({
+                id: 'dev-mode-user',
+                email: 'dev@propflow.ai',
+                firstName: 'Developer',
+                lastName: '(Mode)',
+                name: 'Developer Mode',
+                role: 'OWNER',
+            });
+        }
+
         const user = await prisma.user.findUnique({
             where: { id: session.user.id },
             select: {
