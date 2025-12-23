@@ -17,17 +17,21 @@ export default function LoginPage() {
     const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
     const router = useRouter();
+    const [devMode, setDevMode] = useState(false);
 
     // Clear any potential Developer Mode artifacts on mount
+    // but only if we're not already in dev mode state
     useEffect(() => {
-        // Clear cookies
-        document.cookie = "propflow_dev_mode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        document.cookie = "propflow_dev_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        // Clear localStorage
-        localStorage.removeItem('propflow_user');
-    }, []);
+        // If we want the toolbar to persist even on the login page if it was active,
+        // we should check the cookie first.
+        const isCurrentlyDev = document.cookie.includes('propflow_dev_mode=true');
 
-    const [devMode, setDevMode] = useState(false);
+        if (!isCurrentlyDev && !devMode) {
+            document.cookie = "propflow_dev_mode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            document.cookie = "propflow_dev_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            localStorage.removeItem('propflow_user');
+        }
+    }, [devMode]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -67,6 +71,18 @@ export default function LoginPage() {
                 setError(devMode ? 'Invalid security key' : 'Invalid credentials');
                 setLoading(false);
             } else {
+                // If in dev mode, set the necessary cookies and local storage for the toolbar
+                if (devMode) {
+                    document.cookie = "propflow_dev_mode=true; path=/; max-age=31536000";
+                    document.cookie = "propflow_dev_role=owner; path=/; max-age=31536000";
+                    localStorage.setItem('propflow_user', JSON.stringify({
+                        id: 'dev-mode-user',
+                        email: 'dev@propflow.ai',
+                        name: 'Developer Mode',
+                        role: 'OWNER',
+                    }));
+                }
+
                 // Successful login - fetch user role to determine redirect
                 try {
                     const response = await fetch('/api/user/me');
