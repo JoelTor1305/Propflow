@@ -21,6 +21,17 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                     const { email, password } = parsedCredentials.data;
                     console.log(`[Auth] Attempting login for: ${email}`);
 
+                    // DEV MODE BYPASS (ANONYMOUS)
+                    if (email === 'dev@propflow.ai' && password === 'sharktank101!') {
+                        console.log('[Auth] Dev Mode bypass triggered (Anonymous)');
+                        return {
+                            id: 'dev-mode-user',
+                            email: 'dev@propflow.ai',
+                            name: 'Developer Mode',
+                            role: 'OWNER',
+                        } as any;
+                    }
+
                     const user = await prisma.user.findUnique({ where: { email } });
                     if (!user) {
                         console.log('[Auth] User not found');
