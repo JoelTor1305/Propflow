@@ -102,6 +102,13 @@ export default function LoginPage() {
                 // Successful login - fetch user role to determine redirect
                 try {
                     const response = await fetch('/api/user/me');
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        console.error('Error fetching user profile:', errorData);
+                        // Even if profile fetch fails, we are logged in, but let's redirect to owner by default
+                        router.push('/dashboard/owner');
+                        return;
+                    }
                     const userData = await response.json();
 
                     if (userData.role === 'OWNER') {

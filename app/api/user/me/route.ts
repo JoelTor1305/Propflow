@@ -36,12 +36,20 @@ export async function GET() {
         });
 
         if (!user) {
-            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+            console.error(`[API/User/Me] User not found in database for ID: ${session.user.id}`);
+            return NextResponse.json({
+                error: 'User not found',
+                requestedId: session.user.id,
+                message: `No user matches the session ID in the database.`
+            }, { status: 404 });
         }
 
         return NextResponse.json(user);
     } catch (error) {
         console.error('Error fetching user:', error);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({
+            error: 'Internal server error',
+            details: error instanceof Error ? error.message : String(error)
+        }, { status: 500 });
     }
 }
