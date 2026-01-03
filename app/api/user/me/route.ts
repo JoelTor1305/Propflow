@@ -7,8 +7,11 @@ export async function GET() {
         const session = await auth();
 
         if (!session?.user?.id) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            console.log('[API/User/Me] No user ID in session:', JSON.stringify(session));
+            return NextResponse.json({ error: 'Unauthorized', sessionExists: !!session }, { status: 401 });
         }
+
+        console.log(`[API/User/Me] Fetching for user ID: ${session.user.id}, Email: ${session.user.email}`);
 
         // Handle anonymous Developer Mode
         if (session.user.id === 'dev-mode-user') {
@@ -37,7 +40,7 @@ export async function GET() {
 
         // Fallback: If ID search fails, try searching by email from session
         if (!user && session.user.email) {
-            console.log(`[API/User/Me] ID search failed for ${session.user.id}, trying email fallback: ${session.user.email}`);
+            console.log(`[API/User/Me] ID search failed, trying email fallback for: ${session.user.email}`);
             user = await prisma.user.findUnique({
                 where: { email: session.user.email },
                 select: {
@@ -57,11 +60,13 @@ export async function GET() {
         }
 
         if (!user) {
-            console.error(`[API/User/Me] User not found in database for ID: ${session.user.id}`);
+            console.error(`[API/User/Me] User NOT found. Session ID: ${session.user.id}, Session Email: ${session.user.email}`);
             return NextResponse.json({
                 error: 'User not found',
                 requestedId: session.user.id,
-                message: `No user matches the session ID in the database.`
+                requestedEmail: session.user.email,
+                sessionKeys: Object.keys(session.user),
+                message: `No user matches the session ID or email in the database.`
             }, { status: 404 });
         }
 

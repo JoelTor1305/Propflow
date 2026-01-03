@@ -49,7 +49,12 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
 
                     if (passwordsMatch) {
                         console.log(`[Auth] Password verified successfully for ${email}`);
-                        return user;
+                        return {
+                            id: user.id,
+                            email: user.email,
+                            name: user.name,
+                            role: user.role,
+                        };
                     }
 
                     console.log(`[Auth] Password mismatch for ${email}. Checked against hash starting with: ${user.passwordHash.substring(0, 10)}`);
