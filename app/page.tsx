@@ -60,8 +60,8 @@ export default function LandingPage() {
                     </div>
 
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-8 leading-[1.05] drop-shadow-sm text-white">
-                        Where Financial <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Optimization</span> <br className="hidden md:block" />
-                        Meets <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Simplicity.</span>
+                        Where Financial <span className="inline-block pb-1 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Optimization</span> <br className="hidden md:block" />
+                        Meets <span className="inline-block pb-1 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Simplicity.</span>
                     </h1>
 
                     <p className="max-w-3xl mx-auto text-lg md:text-xl text-slate-400 mb-12 leading-relaxed">
