@@ -56,7 +56,7 @@ export default function UserDropdown() {
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
                     <div className="p-2 space-y-1">
-                        <Link href="/profile" className="flex items-center px-3 py-2 text-sm text-foreground hover:bg-primary/10 hover:text-primary rounded-md transition-colors">
+                        <Link href="/settings" className="flex items-center px-3 py-2 text-sm text-foreground hover:bg-primary/10 hover:text-primary rounded-md transition-colors">
                             <User className="w-4 h-4 mr-3" />
                             Profile
                         </Link>
