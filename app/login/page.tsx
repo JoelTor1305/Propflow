@@ -73,6 +73,7 @@ export default function LoginPage() {
             });
 
             if (result?.error) {
+                console.error('[Login] SignIn Result Error:', result.error);
                 setError(devMode ? 'Invalid security key' : 'Invalid credentials');
                 setLoading(false);
             } else {

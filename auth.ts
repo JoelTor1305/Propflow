@@ -18,8 +18,9 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                     .safeParse(credentials);
 
                 if (parsedCredentials.success) {
-                    const { email, password } = parsedCredentials.data;
-                    console.log(`[Auth] Attempting login for: ${email}`);
+                    const { email: rawEmail, password } = parsedCredentials.data;
+                    const email = rawEmail.toLowerCase().trim();
+                    console.log(`[Auth] Attempting login for: ${email} (Raw: ${rawEmail})`);
 
                     // DEV MODE BYPASS (ANONYMOUS)
                     if (email === 'dev@propflow.ai' && password === 'sharktank101!') {
@@ -39,23 +40,21 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                     }
 
                     if (!user.passwordHash) {
-                        console.log('[Auth] No password hash for user');
+                        console.log(`[Auth] No password hash for user: ${email}`);
                         return null;
                     }
 
-                    console.log(`[Auth] User found, verifying password... (Hash: ${user.passwordHash.substring(0, 10)}...)`);
+                    console.log(`[Auth] User found, verifying password for ${email}... (Hash: ${user.passwordHash.substring(0, 10)}...)`);
                     const passwordsMatch = await bcrypt.compare(password, user.passwordHash);
 
                     if (passwordsMatch) {
-                        console.log('[Auth] Password verified successfully');
+                        console.log(`[Auth] Password verified successfully for ${email}`);
                         return user;
                     }
 
-
-
-                    console.log('[Auth] Password mismatch');
+                    console.log(`[Auth] Password mismatch for ${email}. Checked against hash starting with: ${user.passwordHash.substring(0, 10)}`);
                 } else {
-                    console.log('[Auth] Zod validation failed');
+                    console.log('[Auth] Zod validation failed for credentials:', JSON.stringify(parsedCredentials.error.format()));
                 }
 
                 console.log('[Auth] returning null');
