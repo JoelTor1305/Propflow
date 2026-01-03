@@ -24,13 +24,23 @@ export function useAuth(requireRole?: 'tenant' | 'owner' | 'manager') {
     useEffect(() => {
         const checkDevMode = () => {
             if (typeof document === 'undefined') return;
-            const devModeStr = document.cookie
-                .split('; ')
-                .find(row => row.startsWith('propflow_dev_mode='))
-                ?.split('=')[1];
-            setIsDevMode(devModeStr === 'true');
+            const cookies = document.cookie.split('; ');
+            const devModeCookie = cookies.find(row => row.startsWith('propflow_dev_mode='));
+            const isDev = devModeCookie?.split('=')[1] === 'true';
+            setIsDevMode(isDev);
         };
+
         checkDevMode();
+
+        // Listen for cookie changes or visibility changes to sync state
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                checkDevMode();
+            }
+        };
+
+        window.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => window.removeEventListener('visibilitychange', handleVisibilityChange);
     }, []);
 
     useEffect(() => {
@@ -107,15 +117,19 @@ export function useAuth(requireRole?: 'tenant' | 'owner' | 'manager') {
     }, [session, status, requireRole, router, isDevMode]);
 
     const logout = async () => {
-        if (isDevMode) {
-            localStorage.removeItem('propflow_user');
-            document.cookie = "propflow_dev_mode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-            document.cookie = "propflow_dev_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-            window.location.reload();
-        } else {
-            await signOut({ redirect: false });
-            setUser(null);
-            router.push('/login');
+        // ALWAYS clear dev artifacts on logout, regardless of current mode
+        localStorage.removeItem('propflow_user');
+        document.cookie = "propflow_dev_mode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        document.cookie = "propflow_dev_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+        // Perform standard NextAuth signout
+        await signOut({ redirect: false });
+        setUser(null);
+        router.push('/login');
+
+        // Force refresh to ensure all states are reset
+        if (typeof window !== 'undefined') {
+            window.location.href = '/login';
         }
     };
 

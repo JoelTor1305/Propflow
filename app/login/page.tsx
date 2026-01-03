@@ -22,14 +22,19 @@ export default function LoginPage() {
     // Clear any potential Developer Mode artifacts on mount
     // but only if we're not already in dev mode state
     useEffect(() => {
-        // If we want the toolbar to persist even on the login page if it was active,
-        // we should check the cookie first.
         const isCurrentlyDev = document.cookie.includes('propflow_dev_mode=true');
 
         if (!isCurrentlyDev && !devMode) {
             document.cookie = "propflow_dev_mode=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
             document.cookie = "propflow_dev_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
             localStorage.removeItem('propflow_user');
+        }
+    }, [devMode]);
+
+    // Clear email when entering Dev Mode
+    useEffect(() => {
+        if (devMode) {
+            setFormData(prev => ({ ...prev, email: '' }));
         }
     }, [devMode]);
 
@@ -130,7 +135,7 @@ export default function LoginPage() {
                 </div>
 
                 <form onSubmit={handleLogin} className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500" noValidate>
-                    {!devMode && (
+                    {!devMode ? (
                         <Input
                             type="email"
                             label="Email Address"
@@ -141,6 +146,15 @@ export default function LoginPage() {
                             error={errors.email}
                             className="bg-white/5 border-white/10"
                         />
+                    ) : (
+                        <div className="space-y-1">
+                            <label className="text-sm font-medium text-muted-foreground ml-1">
+                                Developer Email (Fixed)
+                            </label>
+                            <div className="h-12 w-full bg-white/5 border border-white/10 rounded-md flex items-center px-4 text-white/50 font-mono text-sm cursor-not-allowed">
+                                dev@propflow.ai
+                            </div>
+                        </div>
                     )}
 
                     <div className="space-y-1">
