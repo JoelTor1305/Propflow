@@ -66,9 +66,13 @@ export default function LoginPage() {
         }
 
         try {
+            const loginEmail = devMode ? 'dev@propflow.ai' : email.trim();
+            const loginPassword = password.trim();
+            console.log(`[Login] Attempting sign-in for ${loginEmail} (DevMode: ${devMode})`);
+
             const result = await signIn('credentials', {
-                email: devMode ? 'dev@propflow.ai' : email.trim(),
-                password: password.trim(),
+                email: loginEmail,
+                password: loginPassword,
                 redirect: false,
             });
 
