@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { Shield, ChevronUp, User, Building2, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -9,7 +9,7 @@ export default function DevRoleSwitcher() {
     const [isOpen, setIsOpen] = useState(false);
     const [isDevMode, setIsDevMode] = useState(false);
     const [currentRole, setCurrentRole] = useState('owner');
-    const pathname = usePathname();
+
     const router = useRouter();
 
     useEffect(() => {

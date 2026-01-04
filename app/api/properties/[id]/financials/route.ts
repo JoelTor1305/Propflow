@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getSessionUser } from '@/lib/auth/session';
 import { UnauthorizedError } from '@/lib/errors/custom-errors';
 
-export async function POST(
+export async function GET(
     request: NextRequest,
     props: { params: Promise<{ id: string }> }
 ) {
