@@ -64,7 +64,7 @@ export default auth(async function middleware(req) {
         response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
         // Inject rate limit headers
-        response.headers.set('X-RateLimit-Limit', rateLimit.limit?.toString() || '100');
+        response.headers.set('X-RateLimit-Limit', '100');
         response.headers.set('X-RateLimit-Remaining', rateLimit.remaining.toString());
 
         if (!rateLimit.allowed) {
