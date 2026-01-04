@@ -3,7 +3,7 @@
  * Automatically sanitizes sensitive data and respects environment settings
  */
 
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -29,7 +29,7 @@ class SecureLogger {
     /**
      * Log authentication events
      */
-    auth(message: string, data?: any) {
+    auth(message: string, data?: unknown) {
         if (isProd) {
             // Production: minimal logging, no sensitive data
             console.log(`[Auth] ${message}`);
@@ -42,7 +42,7 @@ class SecureLogger {
     /**
      * Log API events
      */
-    api(message: string, data?: any) {
+    api(message: string, data?: unknown) {
         if (isProd) {
             console.log(`[API] ${message}`);
         } else {
@@ -53,14 +53,14 @@ class SecureLogger {
     /**
      * Log errors (always logged, but sanitized)
      */
-    error(message: string, error?: any) {
+    error(message: string, error?: unknown) {
         console.error(`[Error] ${message}`, error ? this.sanitize(error) : '');
     }
 
     /**
      * Debug logs (only in development)
      */
-    debug(message: string, data?: any) {
+    debug(message: string, data?: unknown) {
         if (!isProd) {
             console.log(`[Debug] ${message}`, data ? this.sanitize(data) : '');
         }
