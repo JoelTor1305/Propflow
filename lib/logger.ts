@@ -11,10 +11,10 @@ class SecureLogger {
     /**
      * Sanitize sensitive fields from objects
      */
-    private sanitize(obj: any): any {
+    private sanitize(obj: unknown): unknown {
         if (!obj || typeof obj !== 'object') return obj;
 
-        const sanitized = { ...obj };
+        const sanitized = { ...obj } as Record<string, unknown>;
         const sensitiveFields = ['password', 'passwordHash', 'token', 'secret', 'apiKey'];
 
         for (const field of sensitiveFields) {
